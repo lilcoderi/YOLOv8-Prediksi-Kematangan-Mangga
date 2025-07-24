@@ -1,0 +1,6 @@
+path: d:\Pemograman\Python\Computer Vision\Terbaru\dataset_split
+train: train/images
+val: valid/images
+test: test/images
+names: ['Unripe', 'EarlyRipe', 'PartiallyRipe', 'Ripe']
+nc: 4

@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 3
+names: ['PartiallyRipe', 'Ripe', 'Unripe']
+
+roboflow:
+  workspace: mangga-awhbk
+  project: mangga_fix-iyve8
+  version: 3
+  license: Private
+  url: https://app.roboflow.com/mangga-awhbk/mangga_fix-iyve8/3
