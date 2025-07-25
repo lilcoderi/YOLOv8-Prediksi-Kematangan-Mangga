@@ -28,11 +28,6 @@ st.markdown("""
 [data-testid="stSidebar"] * {
     color: black !important;
 }
-label[data-testid="stMarkdownContainer"] {
-    color: black !important;
-    font-weight: 600;
-}
-
 
 /* Card untuk title */
 .title-card {
@@ -56,20 +51,17 @@ label[data-testid="stMarkdownContainer"] {
 /* =====================================
    STYLING UNTUK SELECTBOX (dropdown)
    ===================================== */
-/* Container utama selectbox */
 div[data-baseweb="select"] > div {
-    background-color: white !important;   /* kotak dropdown putih */
+    background-color: white !important;
     border-radius: 6px;
     border: 1px solid #ccc;
 }
 
-/* Teks yang sedang dipilih di dalam selectbox */
 div[data-baseweb="select"] > div > div {
-    color: black !important;              /* teks item terpilih hitam */
+    color: black !important;
     font-weight: 600;
 }
 
-/* Saat membuka dropdown: item-itemnya */
 ul[role="listbox"] {
     background-color: white !important;
     color: black !important;
@@ -112,7 +104,8 @@ input_method = st.sidebar.radio(
 # ============================
 if input_method == "Upload JPG/IMG":
     st.subheader("📂 Unggah Gambar Mangga")
-    uploaded_file = st.file_uploader("Pilih file gambar (jpg/jpeg/png):", type=["jpg", "jpeg", "png"])
+    st.markdown("**Pilih file gambar (jpg/jpeg/png):**")
+    uploaded_file = st.file_uploader("Silakan pilih", type=["jpg", "jpeg", "png"])
     if uploaded_file is not None:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
             temp_file.write(uploaded_file.read())
@@ -135,7 +128,8 @@ if input_method == "Upload JPG/IMG":
 # ============================
 elif input_method == "Upload dari Kamera":
     st.subheader("📸 Ambil Gambar dari Kamera")
-    camera_image = st.camera_input("Klik tombol di bawah untuk mengambil gambar:")
+    st.markdown("**Klik tombol di bawah untuk mengambil gambar:**")
+    camera_image = st.camera_input("Silakan klik")
     if camera_image is not None:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
             temp_file.write(camera_image.read())
@@ -158,29 +152,27 @@ elif input_method == "Upload dari Kamera":
 # ============================
 elif input_method == "Webcam / Kamera HP (Real-Time)":
     st.subheader("🎥 Real-Time Webcam")
-    st.markdown("**Aktifkan webcam untuk mendeteksi secara real-time.**")
-    run_webcam = st.checkbox("▶️ Jalankan Webcam")
+    st.markdown("**Webcam langsung dijalankan secara real-time.**")
 
     frame_display = st.empty()
 
-    if run_webcam:
-        cap = cv2.VideoCapture(0)
-        if not cap.isOpened():
-            st.error("🚫 Kamera tidak tersedia.")
-        else:
-            st.success("🟢 Webcam aktif. Hilangkan centang untuk menghentikan.")
-            while run_webcam:
-                ret, frame = cap.read()
-                if not ret:
-                    st.error("Gagal membaca frame dari kamera.")
-                    break
+    cap = cv2.VideoCapture(0)
+    if not cap.isOpened():
+        st.error("🚫 Kamera tidak tersedia.")
+    else:
+        st.success("🟢 Webcam aktif.")
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                st.error("Gagal membaca frame dari kamera.")
+                break
 
-                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                results = model(frame_rgb)
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            results = model(frame_rgb)
 
-                for r in results:
-                    detected_frame = r.plot()
+            for r in results:
+                detected_frame = r.plot()
 
-                frame_display.image(detected_frame, channels="BGR")
+            frame_display.image(detected_frame, channels="BGR")
 
-            cap.release()
+        cap.release()
