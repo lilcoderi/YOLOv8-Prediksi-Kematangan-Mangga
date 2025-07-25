@@ -151,16 +151,29 @@ elif input_method == "Upload dari Kamera":
 # ============================
 # 🎥 3. WEBCAM / REAL-TIME (HP & PC via browser)
 # ============================
+from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
+
 elif input_method == "Webcam / Kamera HP (Real-Time)":
     st.subheader("🎥 Real-Time Webcam")
     st.markdown("**Arahkan kamera Anda ke mangga untuk deteksi real-time.**")
 
+    # Kelas untuk memproses frame video
     class VideoTransformer(VideoTransformerBase):
         def transform(self, frame):
+            # Konversi frame ke array BGR
             img = frame.to_ndarray(format="bgr24")
+            # Jalankan deteksi menggunakan model YOLO
             results = model(img)
             for r in results:
                 img = r.plot()
             return img
 
-    webrtc_streamer(key="mangga-detection", video_transformer_factory=VideoTransformer)
+    # Menjalankan streaming video
+    webrtc_streamer(
+        key="mangga-detection",
+        video_transformer_factory=VideoTransformer,
+        media_stream_constraints={
+            "video": True,
+            "audio": False
+        }
+    )
