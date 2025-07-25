@@ -5,7 +5,7 @@ import tempfile
 import os
 import cv2
 import numpy as np
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
+from streamlit_webrtc import webrtc_streamer, VideoTransformerBase  # <-- IMPORT diletakkan di atas
 
 # ============================
 # 🎨 PAGE CONFIG & CUSTOM STYLE
@@ -151,8 +151,6 @@ elif input_method == "Upload dari Kamera":
 # ============================
 # 🎥 3. WEBCAM / REAL-TIME (HP & PC via browser)
 # ============================
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
-
 elif input_method == "Webcam / Kamera HP (Real-Time)":
     st.subheader("🎥 Real-Time Webcam")
     st.markdown("**Arahkan kamera Anda ke mangga untuk deteksi real-time.**")
