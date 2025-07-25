@@ -5,7 +5,6 @@ import tempfile
 import os
 import cv2
 import numpy as np
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
 # ============================
 # 🎨 PAGE CONFIG & CUSTOM STYLE
@@ -20,6 +19,7 @@ st.markdown("""
     background: linear-gradient(to right top, #fdfbfb, #ebedee);
     color: black;
 }
+
 /* Sidebar dengan gradasi dan teks hitam */
 [data-testid="stSidebar"] {
     background: linear-gradient(180deg, #ffe259, #ffa751);
@@ -28,6 +28,7 @@ st.markdown("""
 [data-testid="stSidebar"] * {
     color: black !important;
 }
+
 /* Card untuk title */
 .title-card {
     background: linear-gradient(180deg, #ffe259, #ffa751);
@@ -37,6 +38,8 @@ st.markdown("""
     margin-bottom: 15px;
     text-align: center;
 }
+
+/* H1 di dalam card (perbesar & capslock) */
 .title-card h1 {
     color: black;
     font-size: 1.5rem;
@@ -44,16 +47,21 @@ st.markdown("""
     text-transform: uppercase;
     margin: 0;
 }
-/* Styling untuk selectbox */
+
+/* =====================================
+   STYLING UNTUK SELECTBOX (dropdown)
+   ===================================== */
 div[data-baseweb="select"] > div {
     background-color: white !important;
     border-radius: 6px;
     border: 1px solid #ccc;
 }
+
 div[data-baseweb="select"] > div > div {
     color: black !important;
     font-weight: 600;
 }
+
 ul[role="listbox"] {
     background-color: white !important;
     color: black !important;
@@ -88,7 +96,7 @@ model = YOLO(model_path)
 # === PILIH METODE INPUT ===
 input_method = st.sidebar.radio(
     "📷 Pilih Sumber Gambar",
-    ["Upload JPG/IMG", "Upload dari Kamera", "Webcam / Kamera HP (Real-Time)"]
+    ["Upload JPG/IMG", "Upload dari Kamera", "Webcam Laptop/Komputer (Real-Time)"]
 )
 
 # ============================
@@ -140,32 +148,31 @@ elif input_method == "Upload dari Kamera":
         os.remove(temp_path)
 
 # ============================
-# 🎥 3. WEBCAM / REAL-TIME (HP & PC via browser)
+# 🎥 3. WEBCAM / REAL-TIME
 # ============================
-elif input_method == "Webcam / Kamera HP (Real-Time)":
+elif input_method == "Webcam Laptop/Komputer (Real-Time)":
     st.subheader("🎥 Real-Time Webcam")
-    st.markdown("**Arahkan kamera Anda ke mangga untuk deteksi real-time.**")
+    st.markdown("**Webcam langsung dijalankan secara real-time (khusus untuk komputer/laptop).**")
 
-    # Kelas untuk memproses frame video
-    class VideoTransformer(VideoTransformerBase):
-        def transform(self, frame):
-            img = frame.to_ndarray(format="bgr24")
-            results = model(img)
+    frame_display = st.empty()
+
+    cap = cv2.VideoCapture(0)
+    if not cap.isOpened():
+        st.error("🚫 Kamera tidak tersedia.")
+    else:
+        st.success("🟢 Webcam aktif.")
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                st.error("Gagal membaca frame dari kamera.")
+                break
+
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            results = model(frame_rgb)
+
             for r in results:
-                img = r.plot()
-            return img
+                detected_frame = r.plot()
 
-    # Menjalankan streaming video dengan konfigurasi STUN
-    webrtc_streamer(
-        key="mangga-detection",
-        video_transformer_factory=VideoTransformer,
-        rtc_configuration={  # 🔧 Tambahkan STUN server
-            "iceServers": [
-                {"urls": ["stun:stun.l.google.com:19302"]},
-            ]
-        },
-        media_stream_constraints={
-            "video": True,
-            "audio": False
-        }
-    )
+            frame_display.image(detected_frame, channels="BGR")
+
+        cap.release()
