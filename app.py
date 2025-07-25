@@ -5,6 +5,7 @@ import tempfile
 import os
 import cv2
 import numpy as np
+from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
 # ============================
 # 🎨 PAGE CONFIG & CUSTOM STYLE
@@ -148,31 +149,18 @@ elif input_method == "Upload dari Kamera":
         os.remove(temp_path)
 
 # ============================
-# 🎥 3. WEBCAM / REAL-TIME
+# 🎥 3. WEBCAM / REAL-TIME (HP & PC via browser)
 # ============================
 elif input_method == "Webcam / Kamera HP (Real-Time)":
     st.subheader("🎥 Real-Time Webcam")
-    st.markdown("**Webcam langsung dijalankan secara real-time.**")
+    st.markdown("**Arahkan kamera Anda ke mangga untuk deteksi real-time.**")
 
-    frame_display = st.empty()
-
-    cap = cv2.VideoCapture(0)
-    if not cap.isOpened():
-        st.error("🚫 Kamera tidak tersedia.")
-    else:
-        st.success("🟢 Webcam aktif.")
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                st.error("Gagal membaca frame dari kamera.")
-                break
-
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            results = model(frame_rgb)
-
+    class VideoTransformer(VideoTransformerBase):
+        def transform(self, frame):
+            img = frame.to_ndarray(format="bgr24")
+            results = model(img)
             for r in results:
-                detected_frame = r.plot()
+                img = r.plot()
+            return img
 
-            frame_display.image(detected_frame, channels="BGR")
-
-        cap.release()
+    webrtc_streamer(key="mangga-detection", video_transformer_factory=VideoTransformer)
