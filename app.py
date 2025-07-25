@@ -28,6 +28,11 @@ st.markdown("""
 [data-testid="stSidebar"] * {
     color: black !important;
 }
+label[data-testid="stMarkdownContainer"] {
+    color: black !important;
+    font-weight: 600;
+}
+
 
 /* Card untuk title */
 .title-card {
