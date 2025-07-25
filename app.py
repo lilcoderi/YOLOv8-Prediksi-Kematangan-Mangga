@@ -5,7 +5,7 @@ import tempfile
 import os
 import cv2
 import numpy as np
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase  # <-- IMPORT diletakkan di atas
+from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
 # ============================
 # 🎨 PAGE CONFIG & CUSTOM STYLE
@@ -20,7 +20,6 @@ st.markdown("""
     background: linear-gradient(to right top, #fdfbfb, #ebedee);
     color: black;
 }
-
 /* Sidebar dengan gradasi dan teks hitam */
 [data-testid="stSidebar"] {
     background: linear-gradient(180deg, #ffe259, #ffa751);
@@ -29,7 +28,6 @@ st.markdown("""
 [data-testid="stSidebar"] * {
     color: black !important;
 }
-
 /* Card untuk title */
 .title-card {
     background: linear-gradient(180deg, #ffe259, #ffa751);
@@ -39,8 +37,6 @@ st.markdown("""
     margin-bottom: 15px;
     text-align: center;
 }
-
-/* H1 di dalam card (perbesar & capslock) */
 .title-card h1 {
     color: black;
     font-size: 1.5rem;
@@ -48,21 +44,16 @@ st.markdown("""
     text-transform: uppercase;
     margin: 0;
 }
-
-/* =====================================
-   STYLING UNTUK SELECTBOX (dropdown)
-   ===================================== */
+/* Styling untuk selectbox */
 div[data-baseweb="select"] > div {
     background-color: white !important;
     border-radius: 6px;
     border: 1px solid #ccc;
 }
-
 div[data-baseweb="select"] > div > div {
     color: black !important;
     font-weight: 600;
 }
-
 ul[role="listbox"] {
     background-color: white !important;
     color: black !important;
@@ -158,18 +149,21 @@ elif input_method == "Webcam / Kamera HP (Real-Time)":
     # Kelas untuk memproses frame video
     class VideoTransformer(VideoTransformerBase):
         def transform(self, frame):
-            # Konversi frame ke array BGR
             img = frame.to_ndarray(format="bgr24")
-            # Jalankan deteksi menggunakan model YOLO
             results = model(img)
             for r in results:
                 img = r.plot()
             return img
 
-    # Menjalankan streaming video
+    # Menjalankan streaming video dengan konfigurasi STUN
     webrtc_streamer(
         key="mangga-detection",
         video_transformer_factory=VideoTransformer,
+        rtc_configuration={  # 🔧 Tambahkan STUN server
+            "iceServers": [
+                {"urls": ["stun:stun.l.google.com:19302"]},
+            ]
+        },
         media_stream_constraints={
             "video": True,
             "audio": False
